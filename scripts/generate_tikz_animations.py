@@ -306,54 +306,47 @@ def sine_animation() -> Animation:
     return Animation("interval-sine-integral-stage", 360, 230, tuple(sine_frame(stage) for stage in stages), (1200, 1200, 1200, 1900), 1)
 
 
-def circle(value: float) -> tuple[float, float]:
+def circle(value: Fraction) -> tuple[Fraction, Fraction]:
     return ((1 - value * value) / (1 + value * value), 2 * value / (1 + value * value))
 
 
-def tangent(left: tuple[float, float], right: tuple[float, float]) -> tuple[float, float]:
+def tangent(left: tuple[Fraction, Fraction], right: tuple[Fraction, Fraction]) -> tuple[Fraction, Fraction]:
     determinant = left[0] * right[1] - left[1] * right[0]
     return ((right[1] - left[1]) / determinant, (left[0] - right[0]) / determinant)
 
 
 def circle_frame(cells: int) -> str:
-    x0, y0, radius = 166, 62, 106
+    x0, y0, radius = 180, 18, 154
     screen = lambda value: (x0 + radius * value[0], y0 + radius * value[1])
-    origin, west, north, east = screen((0, 0)), screen((-1, 0)), screen((0, 1)), screen((1, 0))
-    mesh = [i / cells for i in range(cells + 1)]
-    samples, plotted = [circle(t) for t in mesh], []
+    origin, west, east = screen((0, 0)), screen((-1, 0)), screen((1, 0))
+    mesh = [Fraction(i, cells) for i in range(cells + 1)]
+    samples = [circle(t) for t in mesh]
     plotted = [screen(point) for point in samples]
     outer = [screen(tangent(a, b)) for a, b in zip(samples, samples[1:])]
     out = [
-        rf"\draw[axis,line width=.75pt] ({q(west[0]-12)},{q(y0)}) -- ({q(east[0]+16)},{q(y0)});",
-        rf"\draw[axis,line width=.75pt] ({q(x0)},{q(y0-10)}) -- ({q(x0)},{q(north[1]+15)});",
-        rf"\draw[curve,line width=1pt] ({q(x0)},{q(y0)}) -- ({q(x0)},{q(north[1])});",
-        rf"\draw[ink,line width=1.2pt] ({q(east[0])},{q(y0)}) arc[start angle=0,end angle=90,radius={radius}pt];",
-        rf"\path[fill=overfill] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
-        rf"\path[fill=sharedfill] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
-        rf"\draw[under,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
-        rf"\draw[over,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
+        r"\definecolor{paper}{HTML}{FAF9F5}",
+        r"\definecolor{semicircle}{HTML}{20332E}",
+        r"\definecolor{lowerbound}{HTML}{AB471D}",
+        r"\definecolor{upperbound}{HTML}{006C70}",
+        r"\fill[paper] (0,0) rectangle (360,190);",
+        rf"\fill[upperbound!10!paper] {polygon([origin, plotted[0], *outer, plotted[-1]])} -- cycle;",
+        rf"\fill[lowerbound!8!paper] {polygon([origin, *plotted])} -- cycle;",
     ]
-    for value, endpoint in zip(mesh, plotted):
-        vertical = screen((0, value))
+    for value, endpoint in zip(mesh[1:], plotted[1:]):
         out += [
-            rf"\draw[projection,line width=.5pt] ({q(west[0])},{q(west[1])}) -- ({q(endpoint[0])},{q(endpoint[1])});",
-            rf"\draw[grid,line width=.5pt] ({q(vertical[0]-3)},{q(vertical[1])}) -- ({q(vertical[0]+3)},{q(vertical[1])});",
-            dot(*vertical, "axis", 1.3),
+            rf"\draw[semicircle!35!paper,line width=.55pt,dash pattern=on 2.2pt off 2pt] {polygon([west, endpoint])};",
+            dot(*screen((0, value)), "semicircle!65!paper", 1.05),
         ]
     out += [
-        rf"\draw[under,line width=1.1pt] plot coordinates {{{path(plotted)}}};",
-        rf"\draw[over,line width=1.1pt] plot coordinates {{{path([plotted[0], *outer, plotted[-1]])}}};",
+        rf"\draw[semicircle,line width=.85pt] {polygon([west, east])};",
+        rf"\draw[semicircle,line width=1.2pt] ({q(east[0])},{y0}) arc[start angle=0,end angle=180,radius={radius}pt];",
+        rf"\draw[lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt] {polygon(plotted)};",
+        rf"\draw[upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt] {polygon([plotted[0], *outer, plotted[-1]])};",
+        dot(*west, "semicircle", 1.6),
     ]
-    out += [dot(*point, "ink", 1.65) for point in plotted]
-    out += [
-        dot(*origin, "ink", 1.7),
-        dot(*west, "ink", 1.7),
-        n(west[0], west[1] - 13, r"$(-1,0)$", "anchor=north"),
-        n(origin[0], origin[1] - 13, r"$0$", "anchor=north"),
-        n(north[0] - 12, north[1], r"$1$", "anchor=east"),
-        n(east[0] + 11, east[1] - 2, r"$P(0)$", "anchor=west"),
-        n(north[0] + 11, north[1] + 2, r"$P(1)$", "anchor=west"),
-    ]
+    out += [dot(*point, "lowerbound", 1.7) for point in plotted]
+    for x, y in outer:
+        out.append(rf"\fill[upperbound] ({q(x-1.4)},{q(y-1.4)}) rectangle ({q(x+1.4)},{q(y+1.4)});")
     return "\n".join(out)
 
 

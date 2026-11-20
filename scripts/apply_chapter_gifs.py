@@ -1,4 +1,4 @@
-"""Collect chapter GIFs and place the revised square-root figure in the reader."""
+"""Publish revised chapter figures and collect the reader's GIFs for review."""
 
 import argparse
 import csv
@@ -79,9 +79,28 @@ def update_figure(site):
     preface.write_text(updated)
 
 
+def update_circle_figure(site):
+    page = site/'ch-circle-sphere.html'
+    image = 'images/img-0002.gif'
+    poster = 'images/rational-circle-subdivision.png'
+    assets = ROOT/'blueprint/src/assets'
+    shutil.copyfile(assets/'rational-circle-subdivision.gif', site/image)
+    shutil.copyfile(assets/'rational-circle-subdivision.png', site/poster)
+    alt = ('Rays from the left end of the semicircle locate points on its right arc. '
+           'Orange chords bound the quarter-disk from inside and teal tangents bound it from outside.')
+    picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{poster}">'
+               f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
+    pattern = (r'(<figure id="fig:rational-parameter-line">\s*<div class="centered">)'
+               r'(?:<picture>.*?</picture>|<img [^>]+>)')
+    updated, count = re.subn(pattern,lambda m: m[1]+picture,page.read_text(),flags=re.S)
+    assert count == 1, 'circle subdivision figure missing'
+    page.write_text(updated)
+
+
 if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('site',type=Path)
     site = cli.parse_args().site
-    collect(site)
+    update_circle_figure(site)
     update_figure(site)
+    collect(site)
