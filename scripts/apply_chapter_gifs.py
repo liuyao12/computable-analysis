@@ -58,12 +58,12 @@ def update_figure(site):
     caption = re.search(r'<figcaption>(.*?)</figcaption>',figure,re.S)[1]
     chapter = site/'ch-foundations.html'
     original = chapter.read_text()
-    pattern = r'(<figure id="fig:sqrt-secant-tangent">\s*<div class="centered">)<img [^>]+>'
-    updated, count = re.subn(pattern,lambda m: m[1]+picture,original)
-    assert count == 1, 'square-root chapter image missing'
-    old = r'Secant–tangent rational enclosures for \(\sqrt2\).'
-    assert updated.count(old) == 1
-    chapter.write_text(updated.replace(old,caption))
+    pattern = (r'(<figure id="fig:sqrt-secant-tangent">\s*<div class="centered">)'
+               r'(?:<picture>.*?</picture>|<img [^>]+>)'
+               r'(\s*<figcaption>.*?<span class="caption_text">).*?(</span>)')
+    updated, count = re.subn(pattern,lambda m: m[1]+picture+m[2]+caption+m[3],original,flags=re.S)
+    assert count == 1, 'square-root chapter figure missing'
+    chapter.write_text(updated)
     preface = site/'preface.html'
     original = preface.read_text()
     if 'id="fig:sqrt-secant-tangent"' in original:

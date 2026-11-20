@@ -13,22 +13,17 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.mathtext import MathTextParser
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
+from preface_sqrt_tables import decimal
+
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 880, 544
-L, T, R, B = 92, 94, 850, 425
+L, T, R, B = 92, 16, 850, 464
 PW, PH = R-L, B-T
 PAPER, PLOT = '#faf9f5', '#fffefa'
 INK, MUTED, AXIS = '#20332e', '#4e6059', '#597468'
 LOW, HIGH = '#ab471d', '#006c70'
 GRID, MINOR = '#cfdad1', '#eaeee7'
-TITLES = {
-    'start': 'Begin with the two bounds',
-    'project': 'Find both points on the parabola',
-    'secant': 'Trace the secant through the two points',
-    'tangent': 'Draw the tangent from the upper point',
-    'zoom': 'Zoom in on the two crossings',
-    'end': 'Read the tighter bracket',
-}
+PHASES = ('start', 'project', 'secant', 'tangent', 'zoom', 'end')
 MATH = MathTextParser('agg')
 
 
@@ -63,10 +58,20 @@ def math_label(image, x, y, tex, size, color, anchor='left'):
     image.paste(color, (round(x-offset), round(y-mask.height/2)), mask)
 
 
-def fraction_tex(q):
-    if q.denominator == 1:
-        return str(q.numerator)
-    return rf'\frac{{{q.numerator}}}{{{q.denominator}}}'
+def decimal_bounds(a, b):
+    """Show the first differing digit of the two exact decimal expansions."""
+    assert 0 <= a < b
+    places, scale = 0, 1
+    while a*scale // 1 == b*scale // 1:
+        places += 1
+        scale *= 10
+    labels = []
+    for q in (a, b):
+        label = decimal(q, places)
+        if (q*scale).denominator != 1:
+            label += r'\ldots' if places else r'.\ldots'
+        labels.append(label)
+    return labels
 
 
 def camera(bounds):
@@ -105,9 +110,8 @@ def render(bounds, stage, phase, progress=1):
     x = lambda v: PW*(.5+(v-cx)/sx)
     y = lambda v: PH*(.5-(v-cy)/sy)
     level = y(2)
-    phase_order = list(TITLES)
     def amount(step):
-        difference = phase_order.index(phase)-phase_order.index(step)
+        difference = PHASES.index(phase)-PHASES.index(step)
         return progress if difference == 0 else float(difference > 0)
     guide, chord, tangent = (amount(name) for name in ('project', 'secant', 'tangent'))
     # Render plot strokes at double resolution and clip to the plot throughout.
@@ -116,6 +120,26 @@ def render(bounds, stage, phase, progress=1):
     def line(points, color, width=1):
         pen.line([(round(2*u), round(2*v)) for u, v in points], fill=color,
                  width=round(2*width), joint='curve')
+    def dashed_line(start, finish, color, width, dash, gap):
+        dx, dy = finish[0]-start[0], finish[1]-start[1]
+        length = math.hypot(dx, dy)
+        if not length:
+            return
+        ux, uy = dx/length, dy/length
+        # Keep the dash pattern anchored to the starting point while zooming.
+        # Clip the distance range before drawing, since the endpoints can be far offscreen.
+        first, last = 0, length
+        for origin, direction, limit in ((start[0], ux, PW), (start[1], uy, PH)):
+            if direction:
+                entry, exit_ = sorted(((-width-origin)/direction, (limit+width-origin)/direction))
+                first, last = max(first, entry), min(last, exit_)
+            elif not -width <= origin <= limit+width:
+                return
+        period = dash+gap
+        for n in range(math.floor(first/period), math.ceil(last/period)):
+            left, right = max(first, n*period), min(last, n*period+dash)
+            if left < right:
+                line([(start[0]+ux*d, start[1]+uy*d) for d in (left, right)], color, width)
     def marker(u, v, color, square=False, size=4):
         box = ((u-size)*2, (v-size)*2, (u+size)*2, (v+size)*2)
         shape = pen.rectangle if square else pen.ellipse
@@ -136,26 +160,16 @@ def render(bounds, stage, phase, progress=1):
     for v, color, square in ((a, LOW, False), (b, HIGH, True)):
         if -8 < x(v) < PW+8:
             tip = level+(y(v*v)-level)*guide
-            line([(x(v),level), (x(v),tip)], color, 1.6)
+            dashed_line((x(v),level), (x(v),tip), color, 1.6, 6, 4)
             marker(x(v),level,color,square)
             if guide:
                 marker(x(v),tip,color,square,5)
     if chord:
         tip = a+(b-a)*chord
-        line([(x(a),y(a*a)),(x(tip),y(a*a+(a+b)*(tip-a)))], LOW, 3)
+        dashed_line((x(a),y(a*a)), (x(tip),y(a*a+(a+b)*(tip-a))), LOW, 3, 13, 5)
     if tangent:
-        # A broken stroke keeps the two lines distinguishable when nearly parallel.
-        start_x, start_y = x(b), y(b*b)
-        stop_x, stop_y = x(b+(new_b-b)*tangent), y(b*b+(2-b*b)*tangent)
-        dx, dy = stop_x-start_x, stop_y-start_y
-        length = math.hypot(dx,dy)
-        if length:
-            # Only dashes near the visible panel are needed during deep zooms.
-            near = max(0, (start_x-PW-12)/(-dx)) if dx < 0 else 0
-            far = min(1, (start_x+12)/(-dx)) if dx < 0 else 1
-            for n in range(math.floor(near*length/13), math.ceil(far*length/13)):
-                t0, t1 = max(0,n*13/length), min(1,(n*13+9)/length)
-                line([(start_x+t0*dx,start_y+t0*dy),(start_x+t1*dx,start_y+t1*dy)],HIGH,3)
+        stop = (x(b+(new_b-b)*tangent), y(b*b+(2-b*b)*tangent))
+        dashed_line((x(b),y(b*b)), stop, HIGH, 3, 9, 4)
     lower_hit = chord >= (new_a-a)/(b-a)
     upper_hit = tangent == 1
     if lower_hit:
@@ -184,26 +198,12 @@ def render(bounds, stage, phase, progress=1):
         math_label(scene,L+x(new_a)-8,T+level-13,"a'",18,LOW,'right')
     if upper_hit:
         math_label(scene,L+x(new_b)+5,T+level+31,"b'",18,HIGH)
-    title = 'Use the crossings as the new bounds' if stage and phase == 'start' else TITLES[phase]
-    draw.text((32,28),title,font=font(29,'Serif'),fill=INK,anchor='lm')
-    draw.text((R,29),f'Round {stage+1} of 3',font=font(16),fill=MUTED,anchor='rm')
-    # The key uses the same line patterns as the construction.
-    draw.line((L,68,L+25,68),fill=INK,width=3)
-    math_label(scene,L+33,67,'y=x^2',19,INK)
-    draw.line((L+142,68,L+169,68),fill=LOW,width=3)
-    draw.text((L+177,68),'Secant',font=font(16),fill=LOW,anchor='lm')
-    for shift in (0,15):
-        draw.line((L+275+shift,68,L+284+shift,68),fill=HIGH,width=3)
-    draw.text((L+312,68),'Tangent',font=font(16),fill=HIGH,anchor='lm')
-    draw.line((32,449,R,449),fill=GRID)
-    for u, name, i, reached, color, label in (
-        (L, 'a', 0, lower_hit, LOW, 'Lower bound'),
-        (W//2+20, 'b', 1, upper_hit, HIGH, 'Upper bound'),
+    lower, upper = decimal_bounds(bounds[stage+int(lower_hit)][0], bounds[stage+int(upper_hit)][1])
+    for u, name, value, reached, color in (
+        (L, 'a', lower, lower_hit, LOW), (W//2+20, 'b', upper, upper_hit, HIGH),
     ):
-        draw.text((u,472),label,font=font(15),fill=MUTED,anchor='lm')
         prime = "'" if reached else ''
-        q = bounds[stage+int(reached)][i]
-        math_label(scene,u,510,name+prime+'='+fraction_tex(q),24,color)
+        math_label(scene,u,504,name+prime+'='+value,26,color)
     return scene
 
 
