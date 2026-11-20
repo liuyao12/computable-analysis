@@ -202,7 +202,8 @@ def kernel_frame(cells: int, phase: str, progress: float) -> str:
         rf"\draw[graph,line width=1.15pt] plot[smooth] coordinates {{{path(curve)}}};",
         n(0, -.01, r"\(0\)", "anchor=north"), n(1, -.01, r"\(1\)", "anchor=north"),
         n(-.02, 1, r"\(1\)", "anchor=east"), n(1.065, 0, r"\(x\)", "anchor=west"),
-        n(1, 1.08, r"\(y=\frac{1}{1+x^2}\)", "anchor=east"),
+        n(0, 1.06, r"\(y\)", "anchor=south"),
+        n(.54, .808, r"\(y=\frac{1}{1+x^2}\)", "anchor=south west"),
     ]
     for x in mesh:
         out.append(rf"\filldraw[fill=graph,draw=paper,line width=.35pt] ({q(x)},0) circle[radius=1.55pt];")
