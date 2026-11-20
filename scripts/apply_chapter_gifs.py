@@ -118,7 +118,8 @@ def update_arctan_figure(site):
     edition_file.write_text(json.dumps(edition, indent=2, ensure_ascii=False)+'\n')
 
     page = site/'cosine-primitive.html'
-    alt = ('The mark t on the vertical radius determines the shaded arctangent sector. '
+    alt = ('A thick red segment runs from the center to the mark t on the vertical radius. '
+           'The corresponding shaded sector is labeled arctan(t) outside the circle. '
            'New rays project the subdivisions onto the arc as green chords and yellow tangents refine its area bounds.')
     caption = (r'Project the equally spaced marks up to \(t\) onto the arc from the left end of the diameter. '
                r'The shaded sector has area \(A(t)=\arctan(t)\).')

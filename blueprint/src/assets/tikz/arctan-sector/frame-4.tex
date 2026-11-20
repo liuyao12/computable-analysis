@@ -91,6 +91,9 @@
 \fill[upperbound] (258.6475,148.2517) rectangle (261.4475,151.0517);
 \fill[upperbound] (250.3099,152.9664) rectangle (253.1099,155.7664);
 \fill[upperbound] (242.0118,157.0118) rectangle (244.8118,159.8118);
+\definecolor{inputsegment}{HTML}{B52D34}
+\draw[semicircle,line width=.65pt] (180,18) -- (180,172);
+\draw[inputsegment,line width=2.4pt] (180,18) -- (180,120.6667);
 \filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,18) circle[radius=1.55pt];
 \filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,24.4167) circle[radius=1.55pt];
 \filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,30.8333) circle[radius=1.55pt];
@@ -109,6 +112,6 @@
 \filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,114.25) circle[radius=1.55pt];
 \filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,120.6667) circle[radius=1.55pt];
 \node[anchor=south east,inner sep=1pt,text=semicircle,font=\large] at (178,122.6667) {\(t\)};
-\node[inner sep=1pt,text=semicircle,font=\large] at (260.08,54.96) {\(\arctan(t)\)};
+\node[anchor=west,inner sep=1pt,text=semicircle,font=\large] at (290.88,138.12) {\(\arctan(t)\)};
 \end{tikzpicture}
 \end{document}

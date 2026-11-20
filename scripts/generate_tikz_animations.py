@@ -426,14 +426,18 @@ def circle_frame(cells: int, phase: str, progress: float, *, arctan: bool = Fals
     out += [dot(*point, "lowerbound", 1.7) for point in (plotted if reached_arc else old_arc)]
     for x, y in (outer if trace == 1 else old_outer):
         out.append(rf"\fill[upperbound] ({q(x-1.4)},{q(y-1.4)}) rectangle ({q(x+1.4)},{q(y+1.4)});")
+    if arctan:
+        out.append(r"\definecolor{inputsegment}{HTML}{B52D34}")
+        stroke([origin, screen((0, 1))], "semicircle,line width=.65pt")
+        stroke([origin, screen((0, end))], "inputsegment,line width=2.4pt")
     for value in mesh:
         x, y = screen((0, value))
         out.append(rf"\filldraw[fill=semicircle,draw=paper,line width=.35pt] ({q(x)},{q(y)}) circle[radius=1.55pt];")
     if arctan:
         x, y = screen((0, end))
         out.append(rf"\node[anchor=south east,inner sep=1pt,text=semicircle,font=\large] at ({q(x-2)},{q(y+2)}) {{\(t\)}};")
-        x, y = screen((.52, .24))
-        out.append(rf"\node[inner sep=1pt,text=semicircle,font=\large] at ({q(x)},{q(y)}) {{\(\arctan(t)\)}};")
+        x, y = screen((.72, .78))
+        out.append(rf"\node[anchor=west,inner sep=1pt,text=semicircle,font=\large] at ({q(x)},{q(y)}) {{\(\arctan(t)\)}};")
     else:
         measured = previous if previous and not settled else samples
         lower, upper = decimal_bounds(*circle_area_bounds(measured), minimum_places=1)
