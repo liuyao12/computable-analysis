@@ -131,22 +131,34 @@ def update_arctan_figure(site):
     page.write_text(updated)
 
 
-def update_integral_figure(site):
-    name = 'arctan-rectangle-enclosure'
+def update_integral_picture(site, name, alt, caption=None):
     folder = 'reading/integral-grid'
     for suffix in ('gif', 'png'):
         filename = f'{name}.{suffix}'
         shutil.copyfile(ROOT/'blueprint/src/assets'/filename, site/folder/filename)
     page = site/'ch-integrals.html'
     image = f'{folder}/{name}.gif'
-    alt = ('Dashed lines rise from new midpoints to the curve. Green rectangles join the lower sum '
-           'and gold rectangles drop out of the upper sum. The two bounds appear below the graph.')
     picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{folder}/{name}.png">'
                f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
     pattern = rf'(?:<picture>\s*<source\b[^>]*>\s*)?<img\b[^>]*\bsrc="{re.escape(image)}"[^>]*>(?:\s*</picture>)?'
-    updated, count = re.subn(pattern, lambda _: picture, page.read_text())
-    assert count == 1, 'arctangent integral figure missing'
+    if caption is not None:
+        pattern += r'(\s*<figcaption>(?:(?!</figcaption>).)*?<span class="caption_text">)[^<]*(</span>)'
+    updated, count = re.subn(pattern, lambda m: picture if caption is None else
+                             picture+m[1]+escape(caption)+m[2], page.read_text(), flags=re.S)
+    assert count == 1, f'{name} figure missing'
     page.write_text(updated)
+
+
+def update_integral_figure(site):
+    update_integral_picture(site, 'arctan-rectangle-enclosure',
+                            'Dashed lines rise from new midpoints to the curve. Green rectangles join the lower sum '
+                            'and gold rectangles drop out of the upper sum. The two bounds appear below the graph.')
+    chapter = (ROOT/'blueprint/src/03-integrals.tex').read_text()
+    caption = re.search(r'\\intervalSineIntegralStageAnimation\s*\\caption\{(.*?)\}\s*\\end\{figure\}', chapter, re.S)[1]
+    update_integral_picture(site, 'interval-sine-integral-stage',
+                            'In a unit square, dashed guides rise to capped intervals around the sine curve. '
+                            'The upper cap sends a gold edge left and the lower cap sends a green edge right. '
+                            'Earlier bars shrink as the mesh is halved.', ' '.join(caption.split()))
 
 
 if __name__ == '__main__':

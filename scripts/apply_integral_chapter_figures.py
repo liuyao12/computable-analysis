@@ -28,7 +28,6 @@ def figure(name, caption):
 
 
 asset_names = (
-    "interval-sine-integral-stage",
     "single-turn-integral",
     "gaussian-dyadic-windows",
     "dirichlet-dyadic-windows",

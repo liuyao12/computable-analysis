@@ -131,14 +131,8 @@ def rational_kernel(value: Fraction) -> Fraction:
     return 1 / (1 + value * value)
 
 
-def kernel_frame(cells: int, phase: str, progress: float) -> str:
-    mesh = [Fraction(i, cells) for i in range(cells + 1)]
-    fine = [(x, rational_kernel(x)) for x in mesh]
-    coarse = fine[::2] if cells > 1 else fine
-    clearing = phase == "clear"
-    settled = clearing and progress == 1
-    active = fine if clearing else coarse
-    out = [
+def rectangle_plot() -> list[str]:
+    return [
         r"\definecolor{paper}{HTML}{FAF9F5}",
         r"\definecolor{graph}{HTML}{20332E}",
         r"\colorlet{lowerbound}{shared!85!graph}",
@@ -148,6 +142,26 @@ def kernel_frame(cells: int, phase: str, progress: float) -> str:
         r"\fill[paper] (0,0) rectangle (259,261);",
         r"\begin{scope}[shift={(37,45)},x=184pt,y=184pt]",
     ]
+
+
+def rectangle_bound_labels(lower: Fraction, upper: Fraction) -> list[str]:
+    bounds = decimal_bounds(lower, upper, minimum_places=3)
+    lines = []
+    for x, name, value, color in zip((37, 145), ("a", "b"), bounds, ("lowerbound", "upperbound")):
+        if "." in value:
+            value = value.rstrip("0").rstrip(".")
+        lines.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},14) {{\({name}={value}\)}};")
+    return lines
+
+
+def kernel_frame(cells: int, phase: str, progress: float) -> str:
+    mesh = [Fraction(i, cells) for i in range(cells + 1)]
+    fine = [(x, rational_kernel(x)) for x in mesh]
+    coarse = fine[::2] if cells > 1 else fine
+    clearing = phase == "clear"
+    settled = clearing and progress == 1
+    active = fine if clearing else coarse
+    out = rectangle_plot()
 
     def stairs(samples):
         lower, upper = [], []
@@ -213,11 +227,7 @@ def kernel_frame(cells: int, phase: str, progress: float) -> str:
     samples = fine if settled else coarse
     heights = [h for _, h in samples]
     count = len(samples)-1
-    bounds = decimal_bounds(sum(heights[1:])/count, sum(heights[:-1])/count, minimum_places=3)
-    for x, name, value, color in zip((37, 145), ("a", "b"), bounds, ("lowerbound", "upperbound")):
-        if "." in value:
-            value = value.rstrip("0").rstrip(".")
-        out.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},14) {{\({name}={value}\)}};")
+    out.extend(rectangle_bound_labels(sum(heights[1:])/count, sum(heights[:-1])/count))
     return "\n".join(out)
 
 
@@ -265,103 +275,131 @@ def viete_pi_bounds(depth: int) -> tuple[Fraction, Fraction]:
     return lower, upper
 
 
-def sine_box(value: Fraction, stage: int) -> tuple[float, float]:
-    # The integral is restricted to [0, 1/2].  At dyadic inputs in this
-    # interval, the sine values can be evaluated by the usual half-angle
-    # nested-radical chain.  The drawing suppresses that implementation and
-    # shows only its stage-dependent output enclosure.  The deliberately
-    # visible guard represents the finite radical depth at the current stage;
-    # it also grows mildly with the angle, so all bars are not identical.
-    if value == 0:
-        return 0.0, 0.0
-    if value == Fraction(1, 2):
-        return 1.0, 1.0
-    pi_lower, pi_upper = viete_pi_bounds(stage + 2)
-    pi_mid = (pi_lower + pi_upper) / 2
-    angle = value * pi_mid
-    terms = stage + 2
-    estimate = sum(
-        (1 if index % 2 == 0 else -1)
-        * angle ** (2 * index + 1)
-        / math.factorial(2 * index + 1)
-        for index in range(terms + 1)
-    )
-    # The half-angle/nested-radical work is performed only to the current
-    # finite stage.  Keep a visible, location-dependent guard in the drawing:
-    # later stages narrow it, while points farther from zero carry slightly
-    # more propagated angle uncertainty.  This is a visual enclosure budget,
-    # not a claim that the displayed irrational value has been attained.
-    radical_guard = Fraction(3, 2 ** (stage + 5)) * (1 + 2 * value)
-    input_error = value * (pi_upper - pi_lower) + radical_guard
-    remainder = abs(angle) ** (2 * terms + 3) / math.factorial(2 * terms + 3)
-    guard = max(input_error + remainder, Fraction(1, 2 ** (stage + 5)))
-    return float(max(Fraction(0), estimate - guard)), float(min(Fraction(1), estimate + guard))
+def sine_box(x: Fraction, stage: int) -> tuple[Fraction, Fraction]:
+    """Enclose sin(pi*x/2) at a dyadic node, rounding each half-angle radical outward."""
+    if not 0 <= x <= 1 or x.denominator & (x.denominator - 1):
+        raise ValueError("A dyadic point of the unit interval is required")
+
+    def radical(t, bits):
+        if t == 0 or t == 1:
+            return t, t
+        # cos(pi*t) is +sin(pi*(1-2*t)/2) on the left and changes sign on the right.
+        lo, hi = radical(abs(2*t-1), bits + 3)
+        if t <= Fraction(1, 2):
+            lo, hi = -hi, -lo
+        low, _ = rational_sqrt_bounds((1+lo)/2, bits)
+        _, high = rational_sqrt_bounds((1+hi)/2, bits)
+        return low, min(Fraction(1), high)
+
+    if x in (0, 1):
+        return x, x
+    # Locate the sample in one dyadic bin. Doubling the display grid then
+    # halves every old bar, even for radicals very close to a bin edge.
+    scale = 2**(stage + 2)
+    bits = stage + 5
+    while True:
+        lo, hi = radical(x, bits)
+        bin_index = math.floor(lo*scale)
+        if hi*scale <= bin_index + 1:
+            return Fraction(bin_index, scale), Fraction(bin_index+1, scale)
+        bits += 4
 
 
-def sine_frame(stage: int) -> str:
-    # This is the integral on [0, 1/2], not the whole sine arch on [0, 1].
-    x0, y0, xunit, yunit = 52, 35, 280, 155
-    out = [
-        rf"\draw[axis,line width=.75pt] ({x0-12},{y0}) -- ({x0+xunit+13},{y0});",
-        rf"\draw[axis,line width=.75pt] ({x0},{y0-11}) -- ({x0},{y0+yunit+13});",
-    ]
-    denominator = 2**stage
-    mesh = [Fraction(i, denominator) for i in range((denominator + 1)//2)]
-    mesh.append(Fraction(1, 2))
-    boxes = {t: sine_box(t, stage) for t in mesh}
-    for t in mesh:
-        x = x0 + 2 * float(t) * xunit
-        out += [
-            rf"\draw[grid,line width=.3pt] ({q(x)},{y0}) -- ({q(x)},{y0+yunit});",
-            rf"\draw[axis,line width=.55pt] ({q(x)},{y0-3}) -- ({q(x)},{y0+3});",
-        ]
-    for left, right in zip(mesh, mesh[1:]):
-        lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
-        lower = min(boxes[left][0], boxes[right][0])
-        upper = max(boxes[left][1], boxes[right][1])
-        # The clipped right endpoint is the exact peak of this branch.
-        if left <= Fraction(1, 2) <= right:
-            upper = 1.0
-        out += positive_estimate_cell(
-            lx, rx, y0,
-            y0 + lower * yunit,
-            y0 + upper * yunit,
-            .45,
-        )
-    curve = [
-        (x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300))
-        for i in range(151)
-    ]
-    out.append(rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};")
-    for t in mesh:
-        x = x0 + 2 * float(t) * xunit
-        lower, upper = boxes[t]
-        low, high = y0 + float(lower) * yunit, y0 + float(upper) * yunit
-        if t == 0 or t == Fraction(1, 2):
-            out.append(dot(x, low, "curve", 1.35))
-            continue
-        out += [
-            rf"\draw[curve,line width=.8pt] ({q(x)},{q(low)}) -- ({q(x)},{q(high)});",
-            rf"\draw[curve,line width=.6pt] ({q(x-2.5)},{q(low)}) -- ({q(x+2.5)},{q(low)});",
-            rf"\draw[curve,line width=.6pt] ({q(x-2.5)},{q(high)}) -- ({q(x+2.5)},{q(high)});",
-        ]
+def sine_frame(cells: int, phase: str, progress: float) -> str:
+    stage = cells.bit_length()-1
+    mesh = [Fraction(i, cells) for i in range(cells+1)]
+    coarse = mesh[::2] if cells > 1 else mesh
+    boxes = {x: sine_box(x, stage) for x in mesh}
+    if phase == "rays":
+        # Tighten the previously visible bars in place as the new guides rise.
+        p = Fraction(progress).limit_denominator()
+        for x in coarse:
+            old = sine_box(x, stage-1)
+            boxes[x] = tuple((1-p)*a + p*b for a, b in zip(old, boxes[x]))
+
+    clearing = phase == "clear"
+    settled = clearing and progress == 1
+    active = mesh if clearing else coarse
+    out = rectangle_plot()
+    out.append(r"\definecolor{errorbar}{HTML}{793653}")
+
+    def stairs(nodes):
+        lower, upper = [], []
+        for left, right in zip(nodes, nodes[1:]):
+            lower += [(left, boxes[left][0]), (right, boxes[left][0])]
+            upper += [(left, boxes[right][1]), (right, boxes[right][1])]
+        return polygon(lower), polygon(upper)
+
+    lower, upper = stairs(active)
+    for line, color in ((upper, "overfill"), (lower, "sharedfill")):
+        out.append(rf"\fill[{color}] (0,0) -- {line} -- (1,0) -- cycle;")
+
+    strength = progress if phase == "highlight" else (1-progress if clearing else 0)
+    if strength:
+        add_base = "sharedfill" if clearing else "overfill"
+        cut_base = "paper" if clearing else "overfill"
+        for left, mid, right in zip(mesh[::2], mesh[1::2], mesh[2::2]):
+            lo, hi = boxes[mid]
+            out += [
+                rf"\fill[addition!{q(100*strength)}!{add_base}] ({q(mid)},{q(boxes[left][0])}) rectangle ({q(right)},{q(lo)});",
+                rf"\fill[cutoff!{q(100*strength)}!{cut_base}] ({q(left)},{q(hi)}) rectangle ({q(mid)},{q(boxes[right][1])});",
+            ]
+
+    for line, color in ((lower, "lowerbound"), (upper, "upperbound")):
+        out.append(rf"\draw[{color},line width=.65pt] {line};")
+    if clearing and not settled:
+        for line, color in zip(stairs(coarse), ("lowerbound", "upperbound")):
+            out.append(rf"\draw[{color},opacity={q(1-progress)},line width=.65pt] {line};")
+    if not settled:
+        rise = progress if phase == "rays" else 1
+        trace = progress if phase == "rectangles" else int(phase in ("highlight", "clear"))
+        opacity = q(1-progress if clearing else 1)
+        for left, mid, right in zip(mesh[::2], mesh[1::2], mesh[2::2]):
+            lo, hi = boxes[mid]
+            if rise:
+                out.append(rf"\draw[graph!72!paper,opacity={opacity},line width=.8pt,dash pattern=on 2.6pt off 2pt] "
+                           rf"({q(mid)},0) -- ({q(mid)},{q(lo*rise)});")
+            if trace:
+                for cap, end, color in ((lo, right, "lowerbound"), (hi, left, "upperbound")):
+                    out.append(rf"\draw[{color},opacity={opacity},line width=1.15pt,dash pattern=on 3pt off 2pt] "
+                               rf"({q(mid)},{q(cap)}) -- ({q(mid+(end-mid)*trace)},{q(cap)});")
+
+    # Only the reference curve uses floating-point sine. All construction lines use the boxes.
+    curve = [(i/120, math.sin(math.pi*i/240)) for i in range(121)]
     out += [
-        n(x0, y0 - 12, r"$0$", "anchor=north"),
-        n(x0 + xunit / 2, y0 - 12, r"$\frac14$", "anchor=north"),
-        n(x0 + xunit, y0 - 12, r"$\frac12$", "anchor=north"),
-        n(x0 - 10, y0 + yunit, r"$1$", "anchor=east"),
-        n(x0 + xunit + 12, y0 - 2, r"$x$", "anchor=west"),
-        n(x0 + 125, y0 + 109, r"$\sin(\pi x)$"),
-        n(x0 + xunit / 2, y0 + yunit + 19,
-          rf"$\int_0^{{1/2}}\sin(\pi x)\,dx\qquad n={stage}$",
-          "anchor=south"),
+        r"\draw[graph!48!paper,line width=.55pt] (0,1) -- (1,1) -- (1,0);",
+        r"\draw[graph,line width=.8pt] (-.04,0) -- (1.06,0);",
+        r"\draw[graph,line width=.8pt] (0,0) -- (0,1.055);",
+        rf"\draw[graph,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
+        n(0, -.01, r"\(0\)", "anchor=north"), n(1, -.01, r"\(1\)", "anchor=north"),
+        n(-.02, 1, r"\(1\)", "anchor=east"), n(1.065, 0, r"\(x\)", "anchor=west"),
+        n(0, 1.06, r"\(y\)", "anchor=south"),
     ]
+    for x in mesh:
+        out.append(rf"\filldraw[fill=graph,draw=paper,line width=.35pt] ({q(x)},0) circle[radius=1.55pt];")
+    out += [dot(0, 0, "graph", 1.4), dot(1, 1, "graph", 1.4)]
+    for i, x in enumerate(mesh[1:-1], 1):
+        alpha = min(1, max(0, (progress-.75)*4)) if phase == "rays" and i % 2 else 1
+        if alpha:
+            lo, hi = boxes[x]
+            out.append(rf"\draw[errorbar,opacity={q(alpha)},line width=1.25pt] "
+                       rf"({q(x)},{q(lo)}) -- ({q(x)},{q(hi)});")
+            for cap in (lo, hi):
+                out.append(rf"\draw[errorbar,opacity={q(alpha)},line width=1.25pt] "
+                           rf"({q(x-.014)},{q(cap)}) -- ({q(x+.014)},{q(cap)});")
+    out += [
+        r"\end{scope}",
+        n(128, 246, r"\(\displaystyle\int_0^1\sin\!\left(\frac{\pi}{2}x\right)\,dx\)"),
+        n(221, 246, rf"\(n={stage}\)", "anchor=east"),
+    ]
+    count = len(active)-1
+    out.extend(rectangle_bound_labels(sum(boxes[x][0] for x in active[:-1])/count,
+                                      sum(boxes[x][1] for x in active[1:])/count))
     return "\n".join(out)
 
 
 def sine_animation() -> Animation:
-    stages = (0, 1, 2, 3)
-    return Animation("interval-sine-integral-stage", 360, 230, tuple(sine_frame(stage) for stage in stages), (1200, 1200, 1200, 1900), 1)
+    return refinement_animation("interval-sine-integral-stage", 259, 261, 1, sine_frame, "rectangles")
 
 
 def circle(value: Fraction) -> tuple[Fraction, Fraction]:

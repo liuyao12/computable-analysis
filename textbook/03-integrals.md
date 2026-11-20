@@ -317,7 +317,13 @@ Both correction terms vanish on $[0,1/2]$, so both integrals equal $1/4$.
 `GeometricIntegralData.trigSquareIntegral_equiv_endpoint` compares the
 fixed-grid computations with these endpoint formulas.
 
-![Certified sample boxes for the geometric sine on the first quadrant](assets/interval-sine-integral-stage.gif)
+In the unit-square plot, \(x=2t\) and the height is \(S(x/2)=\sin(\pi x/2)\).
+At \(x=1/2\) the height is \(\sqrt{2}/2\), and at \(x=1/4\) it is
+\(\sqrt{2-\sqrt{2}}/2\). Each capped bar encloses a sample as its nested
+radical is computed. The lower cap gives a lower bound to its right, and
+the upper cap gives an upper bound to its left.
+
+![Dashed guides rise to sine sample intervals, which narrow as the dyadic grid refines](assets/interval-sine-integral-stage.gif)
 
 ## Derivatives as continuous extension of the quotient
 
