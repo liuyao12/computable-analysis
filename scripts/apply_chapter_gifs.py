@@ -3,6 +3,7 @@
 import argparse
 import csv
 import hashlib
+import json
 import re
 import shutil
 import zipfile
@@ -99,10 +100,41 @@ def update_circle_figure(site):
     page.write_text(updated)
 
 
+def update_arctan_figure(site):
+    animations = site/'reading/animations'
+    assets = ROOT/'blueprint/src/assets'
+    manifest_file = animations/'manifest.json'
+    manifest = json.loads(manifest_file.read_text())
+    edition_file = site/'reading/analysis-edition.json'
+    edition = json.loads(edition_file.read_text())
+    for suffix, key in (('gif', 'gifSha256'), ('png', 'posterSha256')):
+        name = 'arctan.'+suffix
+        data = (assets/('arctan-sector.'+suffix)).read_bytes()
+        (animations/name).write_bytes(data)
+        digest = hashlib.sha256(data).hexdigest()
+        manifest['files'][name] = digest
+        edition['circleAnimation'][key] = digest
+    manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=False)+'\n')
+    edition_file.write_text(json.dumps(edition, indent=2, ensure_ascii=False)+'\n')
+
+    page = site/'cosine-primitive.html'
+    alt = ('The mark t on the vertical radius determines the shaded arctangent sector. '
+           'New rays project the subdivisions onto the arc as green chords and yellow tangents refine its area bounds.')
+    caption = (r'Project the equally spaced marks up to \(t\) onto the arc from the left end of the diameter. '
+               r'The shaded sector has area \(A(t)=\arctan(t)\).')
+    pattern = r'(<figure [^>]*data-animation="arctan"[^>]*>)<img [^>]*>\s*<figcaption>.*?</figcaption>'
+    updated, count = re.subn(
+        pattern, lambda m: m[1]+f'<img src="reading/animations/arctan.gif" alt="{alt}" '
+        f'width="798" height="421"/><figcaption>{caption}</figcaption>', page.read_text(), flags=re.S)
+    assert count == 1, 'arctangent sector figure missing'
+    page.write_text(updated)
+
+
 if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('site',type=Path)
     site = cli.parse_args().site
     update_circle_figure(site)
+    update_arctan_figure(site)
     update_figure(site)
     collect(site)

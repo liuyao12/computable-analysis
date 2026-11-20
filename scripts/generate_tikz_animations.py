@@ -330,11 +330,12 @@ def circle_area_bounds(points):
     return lower, upper
 
 
-def circle_frame(cells: int, phase: str, progress: float) -> str:
-    x0, y0, radius = 180, 40, 154
+def circle_frame(cells: int, phase: str, progress: float, *, arctan: bool = False) -> str:
+    x0, y0, radius = 180, (18 if arctan else 40), 154
     screen = lambda value: (x0 + radius * value[0], y0 + radius * value[1])
     origin, west, east = screen((0, 0)), screen((-1, 0)), screen((1, 0))
-    mesh = [Fraction(i, cells) for i in range(cells + 1)]
+    end = Fraction(2, 3) if arctan else Fraction(1)
+    mesh = [end * Fraction(i, cells) for i in range(cells + 1)]
     samples = [circle(t) for t in mesh]
     plotted = [screen(point) for point in samples]
     def corners(points):
@@ -358,7 +359,7 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
         r"\definecolor{semicircle}{HTML}{20332E}",
         r"\colorlet{lowerbound}{shared!85!semicircle}",
         r"\colorlet{upperbound}{yellow!59!semicircle}",
-        r"\fill[paper] (0,0) rectangle (360,212);",
+        rf"\fill[paper] (0,0) rectangle (360,{190 if arctan else 212});",
         r"\colorlet{lowerarea}{sharedfill}",
         r"\colorlet{upperarea}{overfill}",
         r"\colorlet{addition}{lowerbound!76!lowerarea}",
@@ -391,6 +392,9 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
         rf"\draw[semicircle,line width=.85pt] {polygon([west, east])};",
         rf"\draw[semicircle,line width=1.2pt] ({q(east[0])},{y0}) arc[start angle=0,end angle=180,radius={radius}pt];",
     ]
+    if arctan:
+        stroke([origin, plotted[-1]], "semicircle,line width=.65pt")
+        stroke([west, plotted[-1]], "semicircle!42!paper,line width=.5pt")
     if not settled:
         travel = progress if phase == "rays" else 1
         for j in range(1, cells, 2):
@@ -425,27 +429,36 @@ def circle_frame(cells: int, phase: str, progress: float) -> str:
     for value in mesh:
         x, y = screen((0, value))
         out.append(rf"\filldraw[fill=semicircle,draw=paper,line width=.35pt] ({q(x)},{q(y)}) circle[radius=1.55pt];")
-    measured = previous if previous and not settled else samples
-    lower, upper = decimal_bounds(*circle_area_bounds(measured), minimum_places=1)
-    for x, name, value, color in ((44, "a", lower, "lowerbound"), (212, "b", upper, "upperbound")):
-        out.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},15) {{\({name}={value}\)}};")
+    if arctan:
+        x, y = screen((0, end))
+        out.append(rf"\node[anchor=south east,inner sep=1pt,text=semicircle,font=\large] at ({q(x-2)},{q(y+2)}) {{\(t\)}};")
+        x, y = screen((.52, .24))
+        out.append(rf"\node[inner sep=1pt,text=semicircle,font=\large] at ({q(x)},{q(y)}) {{\(\arctan(t)\)}};")
+    else:
+        measured = previous if previous and not settled else samples
+        lower, upper = decimal_bounds(*circle_area_bounds(measured), minimum_places=1)
+        for x, name, value, color in ((44, "a", lower, "lowerbound"), (212, "b", upper, "upperbound")):
+            out.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},15) {{\({name}={value}\)}};")
     return "\n".join(out)
 
 
-def circle_animation() -> Animation:
-    frames = [circle_frame(1, "clear", 1)]
+def circle_animation(*, arctan: bool = False) -> Animation:
+    first = 2 if arctan else 1
+    frames = [circle_frame(first, "clear", 1, arctan=arctan)]
     durations, settled = [1400], [0]
-    for cells in (2, 4, 8):
-        frames.append(circle_frame(cells, "rays", 0))
+    for multiplier in (2, 4, 8):
+        cells = first * multiplier
+        frames.append(circle_frame(cells, "rays", 0, arctan=arctan))
         durations.append(330)
         for phase, steps, hold in (("rays", 16, 330), ("triangles", 12, 260),
                                    ("highlight", 5, 950), ("clear", 8, 1100)):
             for step in range(1, steps+1):
-                frames.append(circle_frame(cells, phase, step/steps))
+                frames.append(circle_frame(cells, phase, step/steps, arctan=arctan))
                 durations.append(hold if step == steps else 60)
         settled.append(len(frames)-1)
     durations[-1] = 1900
-    return Animation("rational-circle-subdivision", 360, 212, tuple(frames),
+    return Animation("arctan-sector" if arctan else "rational-circle-subdivision",
+                     360, 190 if arctan else 212, tuple(frames),
                      tuple(durations), settled[-1], tuple(settled))
 
 
@@ -764,6 +777,7 @@ def peano_animation() -> Animation:
 def all_animations() -> tuple[Animation, ...]:
     return (
         circle_animation(),
+        circle_animation(arctan=True),
         kernel_animation("arctan-rectangle-enclosure"),
         sine_animation(),
         sqrt_animation(),

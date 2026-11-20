@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage[paperwidth=360pt,paperheight=190pt,margin=0pt,noheadfoot]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\definecolor{ink}{RGB}{28,41,56}
+\definecolor{axis}{RGB}{100,116,139}
+\definecolor{grid}{RGB}{203,213,225}
+\definecolor{curve}{RGB}{30,64,175}
+\definecolor{teal}{RGB}{13,148,136}
+\definecolor{tealfill}{RGB}{176,227,219}
+% Integral diagrams use exactly one semantic palette: blue for the
+% lower-only part, yellow for the upper-only (or still unresolved) part, and
+% green for their common part.  The common part is explicit rather than an
+% alpha blend, so the three meanings stay distinct after GIF quantization.
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{bluefill}{RGB}{86,180,233}
+\definecolor{yellow}{RGB}{230,159,0}
+\definecolor{yellowfill}{RGB}{255,218,102}
+\definecolor{green}{RGB}{0,128,84}
+\definecolor{greenfill}{RGB}{89,190,142}
+\definecolor{orange}{RGB}{234,88,12}
+\definecolor{orangefill}{RGB}{254,215,170}
+\definecolor{purple}{RGB}{126,34,206}
+\definecolor{yellowedge}{RGB}{202,138,4}
+\definecolor{projection}{RGB}{148,163,184}
+\colorlet{under}{blue}
+\colorlet{underfill}{bluefill}
+\colorlet{over}{yellow}
+\colorlet{overfill}{yellowfill}
+\colorlet{shared}{green}
+\colorlet{sharedfill}{greenfill}
+\colorlet{gap}{yellow}
+\colorlet{gapfill}{yellowfill}
+
+\pagestyle{empty}
+\setlength\parindent{0pt}
+\setlength\topskip{0pt}
+\begin{document}
+\noindent\begin{tikzpicture}[baseline=(current bounding box.north),x=1pt,y=1pt,line cap=round,line join=round]
+\useasboundingbox (0,0) rectangle (360,190);
+\definecolor{paper}{HTML}{FAF9F5}
+\definecolor{semicircle}{HTML}{20332E}
+\colorlet{lowerbound}{shared!85!semicircle}
+\colorlet{upperbound}{yellow!59!semicircle}
+\fill[paper] (0,0) rectangle (360,190);
+\colorlet{lowerarea}{sharedfill}
+\colorlet{upperarea}{overfill}
+\colorlet{addition}{lowerbound!76!lowerarea}
+\colorlet{cutoff}{yellow!85!upperarea}
+\tikzset{chord/.style={lowerbound,line width=.65pt},tangent/.style={upperbound,line width=.65pt},chord trace/.style={chord,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},tangent trace/.style={tangent,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}
+\fill[upperarea] (180,18) -- (334,18) -- (334,69.3333) -- (278,144) -- (239.2308,160.1538) -- cycle;
+\fill[lowerarea] (180,18) -- (334,18) -- (303.2,110.4) -- (239.2308,160.1538) -- cycle;
+\draw[semicircle,line width=.85pt] (26,18) -- (334,18);
+\draw[semicircle,line width=1.2pt] (334,18) arc[start angle=0,end angle=180,radius=154pt];
+\draw[semicircle,line width=.65pt] (180,18) -- (239.2308,160.1538);
+\draw[semicircle!42!paper,line width=.5pt] (26,18) -- (239.2308,160.1538);
+\draw[chord] (334,18) -- (303.2,110.4) -- (239.2308,160.1538);
+\draw[tangent] (334,18) -- (334,69.3333) -- (278,144) -- (239.2308,160.1538);
+\fill[semicircle] (26,18) circle[radius=1.6pt];
+\fill[lowerbound] (334,18) circle[radius=1.7pt];
+\fill[lowerbound] (303.2,110.4) circle[radius=1.7pt];
+\fill[lowerbound] (239.2308,160.1538) circle[radius=1.7pt];
+\fill[upperbound] (332.6,67.9333) rectangle (335.4,70.7333);
+\fill[upperbound] (276.6,142.6) rectangle (279.4,145.4);
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,18) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,69.3333) circle[radius=1.55pt];
+\filldraw[fill=semicircle,draw=paper,line width=.35pt] (180,120.6667) circle[radius=1.55pt];
+\node[anchor=south east,inner sep=1pt,text=semicircle,font=\large] at (178,122.6667) {\(t\)};
+\node[inner sep=1pt,text=semicircle,font=\large] at (260.08,54.96) {\(\arctan(t)\)};
+\end{tikzpicture}
+\end{document}
