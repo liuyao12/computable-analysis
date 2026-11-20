@@ -131,11 +131,30 @@ def update_arctan_figure(site):
     page.write_text(updated)
 
 
+def update_integral_figure(site):
+    name = 'arctan-rectangle-enclosure'
+    folder = 'reading/integral-grid'
+    for suffix in ('gif', 'png'):
+        filename = f'{name}.{suffix}'
+        shutil.copyfile(ROOT/'blueprint/src/assets'/filename, site/folder/filename)
+    page = site/'ch-integrals.html'
+    image = f'{folder}/{name}.gif'
+    alt = ('Dashed lines rise from new midpoints to the curve. Green rectangles join the lower sum '
+           'and gold rectangles drop out of the upper sum. The two bounds appear below the graph.')
+    picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{folder}/{name}.png">'
+               f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
+    pattern = rf'(?:<picture>\s*<source\b[^>]*>\s*)?<img\b[^>]*\bsrc="{re.escape(image)}"[^>]*>(?:\s*</picture>)?'
+    updated, count = re.subn(pattern, lambda _: picture, page.read_text())
+    assert count == 1, 'arctangent integral figure missing'
+    page.write_text(updated)
+
+
 if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('site',type=Path)
     site = cli.parse_args().site
     update_circle_figure(site)
     update_arctan_figure(site)
+    update_integral_figure(site)
     update_figure(site)
     collect(site)

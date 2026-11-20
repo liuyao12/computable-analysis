@@ -4,6 +4,7 @@ import argparse
 import shutil
 from html import escape
 from pathlib import Path
+from apply_chapter_gifs import update_integral_figure
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("site", type=Path)
@@ -27,7 +28,6 @@ def figure(name, caption):
 
 
 asset_names = (
-    "arctan-rectangle-enclosure",
     "interval-sine-integral-stage",
     "single-turn-integral",
     "gaussian-dyadic-windows",
@@ -72,6 +72,8 @@ int_a^b C(t)^2 ,dt simeq rac{b-a}{2} +
     start = '<h2 id="a0000000015">4.4 Finite rules for integrals</h2>'
     page = replace_once(page, start, turned + examples + start)
     chapter.write_text(page)
+
+update_integral_figure(site)
 
 chapter = site / "ch-improper-parameters.html"
 page = chapter.read_text()

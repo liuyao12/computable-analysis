@@ -131,43 +131,97 @@ def rational_kernel(value: Fraction) -> Fraction:
     return 1 / (1 + value * value)
 
 
-def kernel_frame(stage: int) -> str:
-    cells = 2**stage
-    x0, y0, unit = 94, 34, 168
-    out = [
-        rf"\draw[axis,line width=.75pt] ({x0-13},{y0}) -- ({x0+unit+13},{y0});",
-        rf"\draw[axis,line width=.75pt] ({x0},{y0-12}) -- ({x0},{y0+unit+13});",
-    ]
+def kernel_frame(cells: int, phase: str, progress: float) -> str:
     mesh = [Fraction(i, cells) for i in range(cells + 1)]
-    for t in mesh:
-        x = x0 + float(t) * unit
-        out += [
-            rf"\draw[grid,line width=.3pt] ({q(x)},{y0}) -- ({q(x)},{y0+unit});",
-            rf"\draw[axis,line width=.55pt] ({q(x)},{y0-3}) -- ({q(x)},{y0+3});",
-        ]
-    for left, right in zip(mesh, mesh[1:]):
-        lx, rx = x0 + float(left) * unit, x0 + float(right) * unit
-        out += positive_estimate_cell(
-            lx, rx, y0,
-            y0 + float(rational_kernel(right)) * unit,
-            y0 + float(rational_kernel(left)) * unit,
-            .45,
-        )
-    curve = [(x0 + unit * i / 100, y0 + unit / (1 + (i / 100) ** 2)) for i in range(101)]
-    out += [
-        rf"\draw[curve,line width=1.1pt] plot[smooth] coordinates {{{path(curve)}}};",
-        n(x0, y0 - 12, r"$0$", "anchor=north"),
-        n(x0 + unit, y0 - 12, r"$1$", "anchor=north"),
-        n(x0 - 10, y0 + unit, r"$1$", "anchor=east"),
-        n(x0 + unit + 12, y0 - 2, r"$t$", "anchor=west"),
-        n(x0 + 112, y0 + 100, r"$\frac{1}{1+t^2}$", "text=curve"),
-        n(308, 201, rf"$n={stage}$"),
+    fine = [(x, rational_kernel(x)) for x in mesh]
+    coarse = fine[::2] if cells > 1 else fine
+    clearing = phase == "clear"
+    settled = clearing and progress == 1
+    active = fine if clearing else coarse
+    out = [
+        r"\definecolor{paper}{HTML}{FAF9F5}",
+        r"\definecolor{graph}{HTML}{20332E}",
+        r"\colorlet{lowerbound}{shared!85!graph}",
+        r"\colorlet{upperbound}{yellow!59!graph}",
+        r"\colorlet{addition}{lowerbound!76!sharedfill}",
+        r"\colorlet{cutoff}{yellow!85!overfill}",
+        r"\fill[paper] (0,0) rectangle (259,261);",
+        r"\begin{scope}[shift={(37,45)},x=184pt,y=184pt]",
     ]
+
+    def stairs(samples):
+        lower, upper = [], []
+        for (left, high), (right, low) in zip(samples, samples[1:]):
+            lower.extend([(left, low), (right, low)])
+            upper.extend([(left, high), (right, high)])
+        return polygon(lower), polygon(upper)
+
+    lower, upper = stairs(active)
+    for line, color in ((upper, "overfill"), (lower, "sharedfill")):
+        out.append(rf"\fill[{color}] (0,0) -- {line} -- (1,0) -- cycle;")
+
+    strength = progress if phase == "highlight" else (1-progress if clearing else 0)
+    if strength:
+        # On the left half the midpoint raises the floor. On the right it lowers the ceiling.
+        addition = "sharedfill" if clearing else "overfill"
+        removal = "paper" if clearing else "overfill"
+        for i in range(1, cells, 2):
+            (left, high), (mid, height), (right, low) = fine[i-1:i+2]
+            out += [
+                rf"\fill[addition!{q(100*strength)}!{addition}] ({q(left)},{q(low)}) rectangle ({q(mid)},{q(height)});",
+                rf"\fill[cutoff!{q(100*strength)}!{removal}] ({q(mid)},{q(height)}) rectangle ({q(right)},{q(high)});",
+            ]
+    for line, color in ((lower, "lowerbound"), (upper, "upperbound")):
+        out.append(rf"\draw[{color},line width=.65pt] {line};")
+    if clearing and not settled:
+        for line, color in zip(stairs(coarse), ("lowerbound", "upperbound")):
+            out.append(rf"\draw[{color},opacity={q(1-progress)},line width=.65pt] {line};")
+        out.append(rf"\draw[upperbound,opacity={q(1-progress)},line width=.65pt] "
+                   rf"(1,{q(active[-2][1])}) -- (1,{q(coarse[-2][1])});")
+    out.append(rf"\draw[upperbound,line width=.65pt] (1,0) -- (1,{q(active[-2][1])});")
+
+    if not settled:
+        rise = progress if phase == "rays" else 1
+        trace = progress if phase == "rectangles" else int(phase in ("highlight", "clear"))
+        opacity = q(1-progress if clearing else 1)
+        for i in range(1, cells, 2):
+            (left, high), (mid, height), (right, low) = fine[i-1:i+2]
+            if rise:
+                out.append(rf"\draw[graph!72!paper,opacity={opacity},line width=.8pt,dash pattern=on 2.6pt off 2pt] "
+                           rf"({q(mid)},0) -- ({q(mid)},{q(height*rise)});")
+            if trace:
+                for x, y, color in ((left, low, "lowerbound"), (right, high, "upperbound")):
+                    # The two new edges grow together from the sample on the curve.
+                    edges = [(mid+(x-mid)*trace, height), (mid, height), (mid, height+(y-height)*trace)]
+                    out.append(rf"\draw[{color},opacity={opacity},line width=1.15pt,dash pattern=on 3pt off 2pt] {polygon(edges)};")
+
+    curve = [(x/100, 1/(1+(x/100)**2)) for x in range(101)]
+    out += [
+        r"\draw[graph,line width=.8pt] (-.04,0) -- (1.06,0);",
+        r"\draw[graph,line width=.8pt] (0,0) -- (0,1.055);",
+        rf"\draw[graph,line width=1.15pt] plot[smooth] coordinates {{{path(curve)}}};",
+        n(0, -.01, r"\(0\)", "anchor=north"), n(1, -.01, r"\(1\)", "anchor=north"),
+        n(-.02, 1, r"\(1\)", "anchor=east"), n(1.065, 0, r"\(x\)", "anchor=west"),
+        n(1, 1.08, r"\(y=\frac{1}{1+x^2}\)", "anchor=east"),
+    ]
+    for x in mesh:
+        out.append(rf"\filldraw[fill=graph,draw=paper,line width=.35pt] ({q(x)},0) circle[radius=1.55pt];")
+    for x, y in (coarse if phase == "rays" and progress < 1 else fine):
+        out.append(dot(x, y, "graph", 1.4))
+    out.append(r"\end{scope}")
+    samples = fine if settled else coarse
+    heights = [h for _, h in samples]
+    count = len(samples)-1
+    bounds = decimal_bounds(sum(heights[1:])/count, sum(heights[:-1])/count, minimum_places=3)
+    for x, name, value, color in zip((37, 145), ("a", "b"), bounds, ("lowerbound", "upperbound")):
+        if "." in value:
+            value = value.rstrip("0").rstrip(".")
+        out.append(rf"\node[anchor=west,inner sep=0pt,text={color},font=\large] at ({x},14) {{\({name}={value}\)}};")
     return "\n".join(out)
 
 
 def kernel_animation(name: str) -> Animation:
-    return Animation(name, 360, 230, tuple(kernel_frame(i) for i in range(4)), (1200, 1200, 1200, 1900), 3)
+    return refinement_animation(name, 259, 261, 1, kernel_frame, "rectangles")
 
 
 def partial_sine(value: Fraction, last: int) -> Fraction:
@@ -447,22 +501,26 @@ def circle_frame(cells: int, phase: str, progress: float, *, arctan: bool = Fals
 
 
 def circle_animation(*, arctan: bool = False) -> Animation:
-    first = 2 if arctan else 1
-    frames = [circle_frame(first, "clear", 1, arctan=arctan)]
+    return refinement_animation("arctan-sector" if arctan else "rational-circle-subdivision",
+                                360, 190 if arctan else 212, 2 if arctan else 1,
+                                lambda cells, phase, p: circle_frame(cells, phase, p, arctan=arctan), "triangles")
+
+
+def refinement_animation(name, width, height, first, frame, outline_phase) -> Animation:
+    frames = [frame(first, "clear", 1)]
     durations, settled = [1400], [0]
     for multiplier in (2, 4, 8):
         cells = first * multiplier
-        frames.append(circle_frame(cells, "rays", 0, arctan=arctan))
+        frames.append(frame(cells, "rays", 0))
         durations.append(330)
-        for phase, steps, hold in (("rays", 16, 330), ("triangles", 12, 260),
+        for phase, steps, hold in (("rays", 16, 330), (outline_phase, 12, 260),
                                    ("highlight", 5, 950), ("clear", 8, 1100)):
             for step in range(1, steps+1):
-                frames.append(circle_frame(cells, phase, step/steps, arctan=arctan))
+                frames.append(frame(cells, phase, step/steps))
                 durations.append(hold if step == steps else 60)
         settled.append(len(frames)-1)
     durations[-1] = 1900
-    return Animation("arctan-sector" if arctan else "rational-circle-subdivision",
-                     360, 190 if arctan else 212, tuple(frames),
+    return Animation(name, width, height, tuple(frames),
                      tuple(durations), settled[-1], tuple(settled))
 
 
