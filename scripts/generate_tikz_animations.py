@@ -427,7 +427,7 @@ def circle_frame(cells: int, phase: str, progress: float, *, arctan: bool = Fals
     for x, y in (outer if trace == 1 else old_outer):
         out.append(rf"\fill[upperbound] ({q(x-1.4)},{q(y-1.4)}) rectangle ({q(x+1.4)},{q(y+1.4)});")
     if arctan:
-        out.append(r"\definecolor{inputsegment}{HTML}{B52D34}")
+        out.append(r"\definecolor{inputsegment}{HTML}{E47773}")
         stroke([origin, screen((0, 1))], "semicircle,line width=.65pt")
         stroke([origin, screen((0, end))], "inputsegment,line width=2.4pt")
     for value in mesh:
