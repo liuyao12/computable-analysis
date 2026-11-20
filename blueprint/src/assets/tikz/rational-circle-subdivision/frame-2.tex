@@ -44,16 +44,17 @@
 \definecolor{lowerbound}{HTML}{AB471D}
 \definecolor{upperbound}{HTML}{006C70}
 \fill[paper] (0,0) rectangle (360,190);
-\fill[upperbound!10!paper] (180,18) -- (334,18) -- (334,95) -- (231.3333,172) -- (180,172) -- cycle;
-\fill[lowerbound!8!paper] (180,18) -- (334,18) -- (272.4,141.2) -- (180,172) -- cycle;
-\draw[semicircle!35!paper,line width=.55pt,dash pattern=on 2.2pt off 2pt] (26,18) -- (272.4,141.2);
-\fill[semicircle!65!paper] (180,95) circle[radius=1.05pt];
-\draw[semicircle!35!paper,line width=.55pt,dash pattern=on 2.2pt off 2pt] (26,18) -- (180,172);
-\fill[semicircle!65!paper] (180,172) circle[radius=1.05pt];
+\colorlet{lowerarea}{lowerbound!46!paper}
+\colorlet{upperarea}{upperbound!44!paper}
+\colorlet{addition}{lowerbound!82!paper}
+\colorlet{cutoff}{upperbound!84!paper}
+\tikzset{chord/.style={lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},tangent/.style={upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}
+\fill[upperarea] (180,18) -- (334,18) -- (334,95) -- (231.3333,172) -- (180,172) -- cycle;
+\fill[lowerarea] (180,18) -- (334,18) -- (272.4,141.2) -- (180,172) -- cycle;
 \draw[semicircle,line width=.85pt] (26,18) -- (334,18);
 \draw[semicircle,line width=1.2pt] (334,18) arc[start angle=0,end angle=180,radius=154pt];
-\draw[lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt] (334,18) -- (272.4,141.2) -- (180,172);
-\draw[upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt] (334,18) -- (334,95) -- (231.3333,172) -- (180,172);
+\draw[chord] (334,18) -- (272.4,141.2) -- (180,172);
+\draw[tangent] (334,18) -- (334,95) -- (231.3333,172) -- (180,172);
 \fill[semicircle] (26,18) circle[radius=1.6pt];
 \fill[lowerbound] (334,18) circle[radius=1.7pt];
 \fill[lowerbound] (272.4,141.2) circle[radius=1.7pt];

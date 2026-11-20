@@ -86,8 +86,9 @@ def update_circle_figure(site):
     assets = ROOT/'blueprint/src/assets'
     shutil.copyfile(assets/'rational-circle-subdivision.gif', site/image)
     shutil.copyfile(assets/'rational-circle-subdivision.png', site/poster)
-    alt = ('Rays from the left end of the semicircle locate points on its right arc. '
-           'Orange chords bound the quarter-disk from inside and teal tangents bound it from outside.')
+    alt = ('Rays grow together from the left endpoint through dots on the vertical radius to the arc. '
+           'Orange triangles join the inscribed polygon and teal triangles are cut from the outer polygon. '
+           'The guides fade, leaving the refined area bounds.')
     picture = (f'<picture><source media="(prefers-reduced-motion: reduce)" srcset="{poster}">'
                f'<img src="{image}" alt="{alt}" style="width:360pt;max-width:100%;height:auto"/></picture>')
     pattern = (r'(<figure id="fig:rational-parameter-line">\s*<div class="centered">)'

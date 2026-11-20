@@ -1,5 +1,14 @@
 name: Publish chapter GIFs
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: Hosted runner for the static publication
+        type: choice
+        default: ubuntu-slim
+        options:
+          - ubuntu-slim
+          - ubuntu-24.04-arm
 permissions:
   contents: read
   actions: read
@@ -11,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    runs-on: ubuntu-slim
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 15
     environment:
       name: github-pages
@@ -50,7 +59,7 @@ jobs:
         run: |
           mkdir site
           tar -xf previous/artifact.tar -C site
-      - name: Extract the animations and update the two square-root figures
+      - name: Collect the animations and update the chapter figures
         run: |
           python3 scripts/render_foundation_preface_tex.py --check
           python3 scripts/apply_chapter_gifs.py site

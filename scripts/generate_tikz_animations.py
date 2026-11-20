@@ -64,6 +64,8 @@ class Animation:
     frames: tuple[str, ...]
     duration: tuple[int, ...]
     poster: int
+    # Keep a printable source for each settled stage of a continuous animation.
+    source_frames: tuple[int, ...] = ()
 
 
 def q(value: float | Fraction | int) -> str:
@@ -315,43 +317,121 @@ def tangent(left: tuple[Fraction, Fraction], right: tuple[Fraction, Fraction]) -
     return ((right[1] - left[1]) / determinant, (left[0] - right[0]) / determinant)
 
 
-def circle_frame(cells: int) -> str:
+def circle_frame(cells: int, phase: str, progress: float) -> str:
     x0, y0, radius = 180, 18, 154
     screen = lambda value: (x0 + radius * value[0], y0 + radius * value[1])
     origin, west, east = screen((0, 0)), screen((-1, 0)), screen((1, 0))
     mesh = [Fraction(i, cells) for i in range(cells + 1)]
     samples = [circle(t) for t in mesh]
     plotted = [screen(point) for point in samples]
-    outer = [screen(tangent(a, b)) for a, b in zip(samples, samples[1:])]
+    def corners(points):
+        return [screen(tangent(a, b)) for a, b in zip(points, points[1:])]
+
+    def between(a, b, t):
+        return tuple(u + (v-u)*t for u, v in zip(a, b))
+
+    outer = corners(samples)
+    previous = samples[::2] if cells > 1 else []
+    old_arc = [screen(p) for p in previous]
+    old_outer = corners(previous)
+    clearing = phase == "clear"
+    settled = clearing and progress == 1
+    arc, vertices = (plotted, outer) if clearing else (old_arc, old_outer)
+    trace = progress if phase == "triangles" else int(phase in ("highlight", "clear"))
+    highlight = progress if phase == "highlight" else (1-progress if clearing else 0)
+    guides = 1-progress if clearing else 1
     out = [
         r"\definecolor{paper}{HTML}{FAF9F5}",
         r"\definecolor{semicircle}{HTML}{20332E}",
         r"\definecolor{lowerbound}{HTML}{AB471D}",
         r"\definecolor{upperbound}{HTML}{006C70}",
         r"\fill[paper] (0,0) rectangle (360,190);",
-        rf"\fill[upperbound!10!paper] {polygon([origin, plotted[0], *outer, plotted[-1]])} -- cycle;",
-        rf"\fill[lowerbound!8!paper] {polygon([origin, *plotted])} -- cycle;",
+        r"\colorlet{lowerarea}{lowerbound!46!paper}",
+        r"\colorlet{upperarea}{upperbound!44!paper}",
+        r"\colorlet{addition}{lowerbound!82!paper}",
+        r"\colorlet{cutoff}{upperbound!84!paper}",
+        r"\tikzset{chord/.style={lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt},"
+        r"tangent/.style={upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt}}",
     ]
-    for value, endpoint in zip(mesh[1:], plotted[1:]):
-        out += [
-            rf"\draw[semicircle!35!paper,line width=.55pt,dash pattern=on 2.2pt off 2pt] {polygon([west, endpoint])};",
-            dot(*screen((0, value)), "semicircle!65!paper", 1.05),
-        ]
+    def fill(points, color):
+        out.append(rf"\fill[{color}] {polygon(points)} -- cycle;")
+
+    def stroke(points, style):
+        out.append(rf"\draw[{style}] {polygon(points)};")
+
+    if arc:
+        fill([origin, arc[0], *vertices, arc[-1]], "upperarea")
+        fill([origin, *arc], "lowerarea")
+
+    if highlight:
+        strength = q(100*highlight)
+        if previous:
+            for j, corner in enumerate(old_outer):
+                # The new chord pair adds this triangle to the inscribed polygon.
+                fill(plotted[2*j:2*j+3], f"addition!{strength}!{'lowerarea' if clearing else 'upperarea'}")
+                # The new tangent cuts off exactly the old outer vertex.
+                fill([outer[2*j], corner, outer[2*j+1]],
+                     f"cutoff!{strength}!{'paper' if clearing else 'upperarea'}")
+        elif not clearing:
+            fill([origin, plotted[0], *outer, plotted[-1]], f"upperarea!{strength}!paper")
+            fill([origin, *plotted], f"lowerarea!{strength}!paper")
+
     out += [
         rf"\draw[semicircle,line width=.85pt] {polygon([west, east])};",
         rf"\draw[semicircle,line width=1.2pt] ({q(east[0])},{y0}) arc[start angle=0,end angle=180,radius={radius}pt];",
-        rf"\draw[lowerbound,line width=1.25pt,dash pattern=on 5.5pt off 2.3pt] {polygon(plotted)};",
-        rf"\draw[upperbound,line width=1.25pt,dash pattern=on 3.7pt off 2.2pt] {polygon([plotted[0], *outer, plotted[-1]])};",
-        dot(*west, "semicircle", 1.6),
     ]
-    out += [dot(*point, "lowerbound", 1.7) for point in plotted]
-    for x, y in outer:
+    if not settled:
+        travel = progress if phase == "rays" else 1
+        indices = range(1, cells, 2) if previous else range(2)
+        for j in indices:
+            mark, endpoint = screen((0, mesh[j])), plotted[j]
+            # Every ray passes its own marked point at the same beat and
+            # reaches the arc at the same beat, despite their different lengths.
+            tip = (between(west, mark, 2*travel) if travel <= .5
+                   else between(mark, endpoint, 2*travel-1))
+            if travel:
+                stroke([west, tip], f"semicircle!72!paper,opacity={q(guides)},line width=.8pt,dash pattern=on 2.6pt off 2pt")
+            out.append(rf"\fill[semicircle,opacity={q(guides)}] ({q(mark[0])},{q(mark[1])}) circle[radius=1.45pt];")
+    if arc:
+        stroke(arc, "chord")
+        stroke([arc[0], *vertices, arc[-1]], "tangent")
+    if previous and not settled:
+        for j, corner in enumerate(old_outer):
+            a, middle, b = plotted[2*j:2*j+3]
+            left, right = outer[2*j:2*j+2]
+            if clearing:
+                stroke([a, b], f"chord,opacity={q(guides)}")
+                stroke([left, corner, right], f"tangent,opacity={q(guides)}")
+            elif trace:
+                stroke([between(middle, a, trace), middle, between(middle, b, trace)], "chord")
+                stroke([between(middle, left, trace), middle, between(middle, right, trace)], "tangent")
+    elif not previous and trace and not clearing:
+        a, b = plotted
+        stroke([a, between(a, b, trace)], "chord")
+        for endpoint in (a, b):
+            stroke([endpoint, between(endpoint, outer[0], trace)], "tangent")
+    out.append(dot(*west, "semicircle", 1.6))
+    reached_arc = phase != "rays" or progress == 1
+    out += [dot(*point, "lowerbound", 1.7) for point in (plotted if reached_arc else old_arc)]
+    for x, y in (outer if trace == 1 else old_outer):
         out.append(rf"\fill[upperbound] ({q(x-1.4)},{q(y-1.4)}) rectangle ({q(x+1.4)},{q(y+1.4)});")
     return "\n".join(out)
 
 
 def circle_animation() -> Animation:
-    return Animation("rational-circle-subdivision", 360, 190, tuple(circle_frame(i) for i in (1, 2, 4, 8)), (1200, 1200, 1200, 1800), 3)
+    frames, durations, settled = [], [], []
+    for cells in (1, 2, 4, 8):
+        frames.append(circle_frame(cells, "rays", 0))
+        durations.append(330)
+        for phase, steps, hold in (("rays", 16, 330), ("triangles", 12, 260),
+                                   ("highlight", 5, 950), ("clear", 8, 1100)):
+            for step in range(1, steps+1):
+                frames.append(circle_frame(cells, phase, step/steps))
+                durations.append(hold if step == steps else 60)
+        settled.append(len(frames)-1)
+    durations[-1] = 1900
+    return Animation("rational-circle-subdivision", 360, 190, tuple(frames),
+                     tuple(durations), settled[-1], tuple(settled))
 
 
 def sqrt_states() -> list[tuple[Fraction, Fraction]]:
@@ -689,16 +769,21 @@ def render(animation: Animation) -> None:
     try:
         rendered: list[Path] = []
         for index, body in enumerate(animation.frames):
-            source = source_dir / f"frame-{index+1}.tex"
-            source.write_text(tex(animation.width, animation.height, body))
             output = temporary / f"frame-{index+1}"
             output.mkdir()
+            if not animation.source_frames:
+                source = source_dir / f"frame-{index+1}.tex"
+            elif index in animation.source_frames:
+                source = source_dir / f"frame-{animation.source_frames.index(index)+1}.tex"
+            else:
+                source = output / "motion.tex"
+            source.write_text(tex(animation.width, animation.height, body))
             result = subprocess.run(
                 ["pdflatex", "-interaction=batchmode", "-halt-on-error", f"-output-directory={output}", str(source)],
                 cwd=output, text=True, capture_output=True,
             )
             if result.returncode:
-                raise RuntimeError(f"TikZ compilation failed for {source.relative_to(ROOT)}:\n{result.stdout}\n{result.stderr}")
+                raise RuntimeError(f"TikZ compilation failed for {source}:\n{result.stdout}\n{result.stderr}")
             pdf = output / (source.stem+".pdf")
             prefix = output / "rendered"
             subprocess.run(["pdftoppm","-png","-r","160",str(pdf),str(prefix)],check=True)
